@@ -2,10 +2,10 @@ import streamlit as st
 import database as db
 import processor as proc
 
-# 1. Page Configuration (Must be the first Streamlit command)
+# 1. Page Configuration
 st.set_page_config(page_title="Manuscript Automator", page_icon="📝", layout="centered", initial_sidebar_state="collapsed")
 
-# 2. Inject Custom CSS for "SaaS Level" Look
+# 2. Inject Dark Theme Custom CSS
 custom_css = """
 <style>
     /* Hide Streamlit Default Menu & Footer */
@@ -13,34 +13,35 @@ custom_css = """
     footer {visibility: hidden;}
     header {visibility: hidden;}
 
-    /* Main Background & Text */
+    /* Main App Background (Deep Slate) & Text */
     .stApp {
-        background-color: #f8f9fa;
-        color: #1e1e1e;
+        background-color: #0f172a;
+        color: #f8fafc;
         font-family: 'Inter', sans-serif;
     }
 
-    /* Standard Button Styling (Login, Sign Up, Process) */
+    /* Standard Button Styling (Vibrant Blue for visibility) */
     .stButton > button {
         width: 100%;
-        background-color: #2b313e;
-        color: white;
+        background-color: #2563eb;
+        color: #ffffff;
         border-radius: 8px;
-        border: none;
+        border: 1px solid #3b82f6;
         padding: 10px 24px;
         font-weight: 600;
         transition: all 0.3s ease;
     }
     .stButton > button:hover {
-        background-color: #434c5e;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        color: white;
+        background-color: #1d4ed8;
+        border-color: #2563eb;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        color: #ffffff;
     }
 
-    /* Make the Download Button POP (Gradient) */
+    /* Make the Download Button POP (Neon Purple/Pink Gradient) */
     .stDownloadButton > button {
         width: 100%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
         color: white;
         border-radius: 8px;
         border: none;
@@ -51,23 +52,39 @@ custom_css = """
     }
     .stDownloadButton > button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 15px rgba(118, 75, 162, 0.3);
+        box-shadow: 0 8px 15px rgba(236, 72, 153, 0.4);
         color: white;
     }
 
-    /* Style the File Uploader */
+    /* Style the File Uploader for Dark Mode */
     [data-testid="stFileUploadDropzone"] {
-        background-color: #ffffff;
-        border: 2px dashed #cbd5e1;
+        background-color: #1e293b;
+        border: 2px dashed #475569;
         border-radius: 12px;
         padding: 20px;
+        color: #f8fafc;
+    }
+    [data-testid="stFileUploadDropzone"]:hover {
+        border-color: #8b5cf6;
+        background-color: #283548;
     }
     
-    /* Clean up input fields */
+    /* Clean up input fields for Dark Mode */
     .stTextInput > div > div > input {
+        background-color: #1e293b;
+        color: #f8fafc;
         border-radius: 8px;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #334155;
         padding: 10px;
+    }
+    .stTextInput > div > div > input:focus {
+        border-color: #8b5cf6;
+        box-shadow: 0 0 0 1px #8b5cf6;
+    }
+
+    /* Override markdown text colors to ensure visibility */
+    .stMarkdown p, .stMarkdown li {
+        color: #cbd5e1 !important;
     }
 </style>
 """
@@ -81,12 +98,12 @@ if 'username' not in st.session_state:
 
 # --- Login / Signup Landing Page ---
 if not st.session_state['logged_in']:
-    # Use columns to create a centered, narrow login card
     col1, col2, col3 = st.columns([1, 2, 1])
     
     with col2:
-        st.write("<h1 style='text-align: center; color: #2b313e;'>Manuscript AI</h1>", unsafe_allow_html=True)
-        st.write("<p style='text-align: center; color: #64748b;'>Automated publication formatting.</p>", unsafe_allow_html=True)
+        # Changed text colors to white and light gray for dark mode
+        st.write("<h1 style='text-align: center; color: #ffffff;'>Manuscript AI</h1>", unsafe_allow_html=True)
+        st.write("<p style='text-align: center; color: #94a3b8;'>Automated publication formatting.</p>", unsafe_allow_html=True)
         st.write("") # Spacer
         
         tab1, tab2 = st.tabs(["Login", "Sign Up"])
@@ -116,7 +133,6 @@ if not st.session_state['logged_in']:
 
 # --- Main App Dashboard ---
 else:
-    # Sidebar for navigation/logout
     with st.sidebar:
         st.title(f"👋 Hi, {st.session_state['username']}")
         st.write("Welcome to your dashboard.")
@@ -126,8 +142,8 @@ else:
             st.session_state['username'] = ''
             st.rerun()
 
-    # Main UI
-    st.write("<h2 style='color: #2b313e;'>Format Your Manuscript</h2>", unsafe_allow_html=True)
+    # Changed header to pure white
+    st.write("<h2 style='color: #ffffff;'>Format Your Manuscript</h2>", unsafe_allow_html=True)
     st.info("✨ AI will enforce: Times New Roman, Justified text, 1.5 spacing, and custom headings.")
     
     st.write("### 1. Upload Raw Document")
@@ -137,13 +153,11 @@ else:
         st.write("### 2. Process & Download")
         
         if st.button("🚀 Process Document"):
-            
-            # Run the logic from your upgraded processor.py
-            processed_file = proc.process_document(uploaded_file, "Custom")
+            with st.spinner("Processing..."):
+                processed_file = proc.process_document(uploaded_file, "Custom")
             
             st.success("✅ Formatting complete! Your document is ready.")
             
-            # The CSS above targets this specific button to make it a purple gradient
             st.download_button(
                 label="📥 Download Publication-Ready Manuscript",
                 data=processed_file,

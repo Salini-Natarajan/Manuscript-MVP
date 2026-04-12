@@ -53,11 +53,8 @@ else:
     uploaded_file = st.file_uploader("Choose a raw .docx file", type=["docx"])
     
     # 2. Selection
-    st.subheader("2. Select Target Journal Style")
-    journal_style = st.selectbox(
-        "Available Templates",
-        ("IEEE Format", "Nature Format", "KPRIET Thesis Style")
-    )
+    st.info("Document will be formatted to custom specifications (Times New Roman, Justified, 1.5 Spacing, Custom Headings).")
+    journal_style = "Custom"
     
     # 3. Process & 4. Download
     if uploaded_file is not None:

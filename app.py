@@ -153,14 +153,25 @@ else:
         st.write("### 2. Process & Download")
         
         if st.button("🚀 Process Document"):
-            with st.spinner("Processing..."):
-                processed_file = proc.process_document(uploaded_file, "Custom")
             
-            st.success("✅ Formatting complete! Your document is ready.")
+            # --- NEW LIMIT CHECK ---
+            with st.spinner("Checking document length..."):
+                word_count = proc.get_word_count(uploaded_file)
             
-            st.download_button(
-                label="📥 Download Publication-Ready Manuscript",
-                data=processed_file,
-                file_name=f"Formatted_{uploaded_file.name}",
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            )
+            if word_count > 2500:
+                st.error(f"❌ Error: Document is too long ({word_count} words). The free tier is limited to 2,500 words (approx. 10 pages).")
+            # -----------------------
+            
+            else:
+                # If it passes the test, process it normally!
+                with st.spinner(f"Processing {word_count} words..."):
+                    processed_file = proc.process_document(uploaded_file, "Custom")
+                
+                st.success("✅ Formatting complete! Your document is ready.")
+                
+                st.download_button(
+                    label="📥 Download Publication-Ready Manuscript",
+                    data=processed_file,
+                    file_name=f"Formatted_{uploaded_file.name}",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                )

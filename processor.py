@@ -82,6 +82,18 @@ def apply_custom_formatting(paragraph, classification):
         run.font.italic = italic
         run.font.color.rgb = color
 
+def get_word_count(uploaded_file):
+    """Scans the document and returns the total word count."""
+    doc = Document(uploaded_file)
+    full_text = []
+    
+    for para in doc.paragraphs:
+        full_text.append(para.text)
+        
+    # Join all text and count the words
+    total_words = len(" ".join(full_text).split())
+    return total_words
+
 def process_document(uploaded_file, style):
     doc = Document(uploaded_file)
     

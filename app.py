@@ -2,7 +2,7 @@ import streamlit as st
 import database as db
 import processor as proc
 
-# 1. Page Configuration
+# 1. Page Configuration (Must be the first Streamlit command)
 st.set_page_config(page_title="Manuscript Automator", page_icon="📝", layout="centered", initial_sidebar_state="collapsed")
 
 # 2. Inject Dark Theme Custom CSS
@@ -101,7 +101,6 @@ if not st.session_state['logged_in']:
     col1, col2, col3 = st.columns([1, 2, 1])
     
     with col2:
-        # Changed text colors to white and light gray for dark mode
         st.write("<h1 style='text-align: center; color: #ffffff;'>Manuscript AI</h1>", unsafe_allow_html=True)
         st.write("<p style='text-align: center; color: #94a3b8;'>Automated publication formatting.</p>", unsafe_allow_html=True)
         st.write("") # Spacer
@@ -142,10 +141,36 @@ else:
             st.session_state['username'] = ''
             st.rerun()
 
-    # Changed header to pure white
     st.write("<h2 style='color: #ffffff;'>Format Your Manuscript</h2>", unsafe_allow_html=True)
-    st.info("✨ AI will enforce: Times New Roman, Justified text, 1.5 spacing, and custom headings.")
+    st.info("✨ Let AI structure your document using your exact specifications.")
     
+    # --- NEW: CUSTOMIZATION PANEL ---
+    with st.expander("⚙️ Customize Formatting Rules (Click to expand)", expanded=False):
+        col1, col2 = st.columns(2)
+        with col1:
+            font_choice = st.selectbox("Global Font", ["Times New Roman", "Arial", "Calibri", "Garamond"])
+            title_size = st.number_input("Title Size (pt)", min_value=12, max_value=36, value=24)
+            h1_size = st.number_input("Heading 1 Size (pt)", min_value=10, max_value=24, value=14)
+            h2_size = st.number_input("Heading 2 Size (pt)", min_value=10, max_value=24, value=13)
+        with col2:
+            line_spacing = st.selectbox("Line Spacing", [1.0, 1.15, 1.5, 2.0], index=2)
+            body_size = st.number_input("Body Text Size (pt)", min_value=8, max_value=18, value=12)
+            h1_color = st.color_picker("Heading 1 Color", "#000000") # Defaults to Black
+            h2_color = st.color_picker("Heading 2 Color", "#0000FF") # Defaults to Blue
+
+        # Pack these into a dictionary to send to the backend
+        user_settings = {
+            "font": font_choice,
+            "line_spacing": line_spacing,
+            "title_size": title_size,
+            "h1_size": h1_size,
+            "h2_size": h2_size,
+            "body_size": body_size,
+            "h1_color": h1_color,
+            "h2_color": h2_color
+        }
+    # --------------------------------
+
     st.write("### 1. Upload Raw Document")
     uploaded_file = st.file_uploader("", type=["docx"], help="Upload your raw .docx manuscript here.")
     
@@ -163,9 +188,9 @@ else:
             # -----------------------
             
             else:
-                # If it passes the test, process it normally!
-                with st.spinner(f"Processing {word_count} words..."):
-                    processed_file = proc.process_document(uploaded_file, "Custom")
+                # Process normally with the custom user settings
+                with st.spinner(f"Processing {word_count} words with your custom rules..."):
+                    processed_file = proc.process_document(uploaded_file, user_settings)
                 
                 st.success("✅ Formatting complete! Your document is ready.")
                 
